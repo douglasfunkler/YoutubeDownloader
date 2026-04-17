@@ -9,6 +9,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+
+import javax.swing.*;
+
 public class MainFrame extends JFrame {
 
     private final JTextField urlField = new JTextField();
@@ -29,6 +33,13 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         setLocationRelativeTo(null);
+
+        try {
+            FlatSVGIcon icon = new FlatSVGIcon(getClass().getResource("/icon.svg"));
+            setIconImage(icon.getImage());
+        } catch (final Exception exception) {
+            exception.printStackTrace();
+        }
 
         // Combined panel for URL and options
         JPanel topSectionPanel = createTopSectionPanel();
@@ -79,9 +90,9 @@ public class MainFrame extends JFrame {
                         JOptionPane.showMessageDialog(this, "yt-dlp updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         updateButton.setEnabled(true);
                     });
-                } catch (Exception ex) {
+                } catch (final Exception exception) {
                     SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(this, "Update failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(this, "Update failed: " + exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         updateButton.setEnabled(true);
                     });
                 }
