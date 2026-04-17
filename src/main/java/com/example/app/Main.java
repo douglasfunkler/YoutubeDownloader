@@ -2,8 +2,7 @@ package com.example.app;
 
 import com.example.app.ui.MainFrame;
 import com.example.app.ui.ThemeManager;
-
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {

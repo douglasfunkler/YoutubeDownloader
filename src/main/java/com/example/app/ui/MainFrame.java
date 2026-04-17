@@ -34,12 +34,18 @@ public class MainFrame extends JFrame {
 
         add(topSectionPanel, BorderLayout.NORTH);
         
-        // Log area with clear button in bottom right
+        // Log area with clear button in bottom right and theme button in bottom left
         JPanel logPanel = new JPanel(new BorderLayout());
         logPanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
-        JPanel logButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel logButtonPanel = new JPanel(new BorderLayout());
+        JPanel leftButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton themeButton = new JButton("Switch Theme");
+        leftButtonPanel.add(themeButton);
+        logButtonPanel.add(leftButtonPanel, BorderLayout.WEST);
+        JPanel rightButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton clearLogButton = new JButton("Clear Log");
-        logButtonPanel.add(clearLogButton);
+        rightButtonPanel.add(clearLogButton);
+        logButtonPanel.add(rightButtonPanel, BorderLayout.EAST);
         logPanel.add(logButtonPanel, BorderLayout.SOUTH);
         add(logPanel, BorderLayout.CENTER);
         
@@ -50,10 +56,13 @@ public class MainFrame extends JFrame {
         downloadButton.addActionListener(e -> startDownload());
         pasteButton.addActionListener(e -> pasteFromClipboard());
         browseButton.addActionListener(e -> browsePath());
+
         clearLogButton.addActionListener(e -> {
             logArea.setText("");
             progressBar.setValue(0);
         });
+
+        themeButton.addActionListener(e -> switchTheme());
     }
 
     private JPanel createTopSectionPanel() {
@@ -161,5 +170,21 @@ public class MainFrame extends JFrame {
                 SwingUtilities.invokeLater(() -> downloadButton.setEnabled(true));
             }
         }).start();
+    }
+
+    private void switchTheme() {
+        // Determine current theme and switch to the opposite
+        try {
+            String currentLaf = UIManager.getLookAndFeel().getClass().getName();
+            if (currentLaf.contains("FlatDarkLaf")) {
+                ThemeManager.setLightTheme();
+            } else {
+                ThemeManager.setDarkTheme();
+            }
+            // Update all components to reflect the new theme
+            SwingUtilities.updateComponentTreeUI(this);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Failed to switch theme: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

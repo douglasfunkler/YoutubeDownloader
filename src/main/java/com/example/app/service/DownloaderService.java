@@ -10,13 +10,6 @@ import java.util.regex.Pattern;
 public class DownloaderService {
 
     /**
-     * Download with default options (for backward compatibility)
-     */
-    public void download(String url, ProgressListener progressListener, LogListener logListener) {
-        download(url, System.getProperty("user.home") + "/Downloads", "bestvideo*+bestaudio/best", progressListener, logListener);
-    }
-
-    /**
      * Download with custom options
      */
     public void download(String url, String downloadPath, String videoFormat, ProgressListener progressListener, LogListener logListener) {
