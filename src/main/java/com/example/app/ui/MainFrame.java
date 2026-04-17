@@ -33,7 +33,15 @@ public class MainFrame extends JFrame {
         JPanel topSectionPanel = createTopSectionPanel();
 
         add(topSectionPanel, BorderLayout.NORTH);
-        add(new JScrollPane(logArea), BorderLayout.CENTER);
+        
+        // Log area with clear button in bottom right
+        JPanel logPanel = new JPanel(new BorderLayout());
+        logPanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
+        JPanel logButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton clearLogButton = new JButton("Clear Log");
+        logButtonPanel.add(clearLogButton);
+        logPanel.add(logButtonPanel, BorderLayout.SOUTH);
+        add(logPanel, BorderLayout.CENTER);
         
         // Set progress bar height
         progressBar.setPreferredSize(new Dimension(Integer.MAX_VALUE, PROGRESS_BAR_HEIGHT));
@@ -42,6 +50,10 @@ public class MainFrame extends JFrame {
         downloadButton.addActionListener(e -> startDownload());
         pasteButton.addActionListener(e -> pasteFromClipboard());
         browseButton.addActionListener(e -> browsePath());
+        clearLogButton.addActionListener(e -> {
+            logArea.setText("");
+            progressBar.setValue(0);
+        });
     }
 
     private JPanel createTopSectionPanel() {
@@ -90,7 +102,7 @@ public class MainFrame extends JFrame {
         // Download Directory
          panel.add(new JLabel("Download Directory:"));
          JPanel downloadPathPanel = new JPanel(new BorderLayout(5, 0));
-         downloadPathField.setText(System.getProperty("user.home") + "/Downloads");
+         downloadPathField.setText(System.getProperty("user.home") + File.separator + "Desktop");
          downloadPathPanel.add(downloadPathField, BorderLayout.CENTER);
          downloadPathPanel.add(browseButton, BorderLayout.EAST);
          panel.add(downloadPathPanel);
