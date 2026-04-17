@@ -54,8 +54,10 @@ public class MainFrame extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         
-        JPanel urlPanel = new JPanel(new BorderLayout());
-        urlPanel.add(new JLabel("URL:"), BorderLayout.WEST);
+        JPanel urlPanel = new JPanel(new BorderLayout(10, 0));
+        JLabel urlLabel = new JLabel("URL:");
+        urlPanel.add(urlLabel, BorderLayout.WEST);
+        urlField.setPreferredSize(new Dimension(0, 30));
         urlPanel.add(urlField, BorderLayout.CENTER);
         
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -81,12 +83,12 @@ public class MainFrame extends JFrame {
         panel.add(videoFormatCombo);
         
         // Download Directory
-        panel.add(new JLabel("Download Directory:"));
-        JPanel downloadPathPanel = new JPanel(new BorderLayout());
-        downloadPathField.setText(System.getProperty("user.home") + "/Downloads");
-        downloadPathPanel.add(downloadPathField, BorderLayout.CENTER);
-        downloadPathPanel.add(browseButton, BorderLayout.EAST);
-        panel.add(downloadPathPanel);
+         panel.add(new JLabel("Download Directory:"));
+         JPanel downloadPathPanel = new JPanel(new BorderLayout(5, 0));
+         downloadPathField.setText(System.getProperty("user.home") + "/Downloads");
+         downloadPathPanel.add(downloadPathField, BorderLayout.CENTER);
+         downloadPathPanel.add(browseButton, BorderLayout.EAST);
+         panel.add(downloadPathPanel);
         
         return panel;
     }
