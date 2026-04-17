@@ -8,6 +8,14 @@ java {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("com.formdev:flatlaf:3.7")
+}
+
 application {
     mainClass.set("com.example.app.Main")
 }
