@@ -7,9 +7,7 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        // Initialize theme and GUI settings
         ThemeManager.initializeTheme();
-        
         SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
     }
 }

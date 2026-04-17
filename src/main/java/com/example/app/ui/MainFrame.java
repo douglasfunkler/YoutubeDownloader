@@ -25,6 +25,7 @@ public class MainFrame extends JFrame {
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        setLocationRelativeTo(null);
 
         // Combined panel for URL and options
         JPanel topSectionPanel = createTopSectionPanel();
