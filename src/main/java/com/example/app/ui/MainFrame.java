@@ -12,35 +12,41 @@ public class MainFrame extends JFrame {
 
     private JTextField urlField = new JTextField();
     private JButton downloadButton = new JButton("Download");
-    private JButton pasteButton = new JButton("Einfügen");
-    private JButton browseButton = new JButton("Durchsuchen");
+    private JButton pasteButton = new JButton("Paste");
+    private JButton browseButton = new JButton("Browse");
     private JTextArea logArea = new JTextArea();
     private JProgressBar progressBar = new JProgressBar(0, 100);
     
     private JTextField downloadPathField = new JTextField();
     private JComboBox<FormatProvider.FormatOption> videoFormatCombo;
-    private JComboBox<FormatProvider.FormatOption> audioFormatCombo;
 
     public MainFrame() {
         setTitle("yt-dlp Downloader");
-        setSize(800, 550);
+        setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // Oberes Panel mit URL-Eingabe
-        JPanel topPanel = createTopPanel();
-        
-        // Optionen-Panel mit Formaten und Verzeichnis
-        JPanel optionsPanel = createOptionsPanel();
+        // Combined panel for URL and options
+        JPanel topSectionPanel = createTopSectionPanel();
 
-        add(topPanel, BorderLayout.NORTH);
-        add(optionsPanel, BorderLayout.PAGE_START);
+        add(topSectionPanel, BorderLayout.NORTH);
         add(new JScrollPane(logArea), BorderLayout.CENTER);
         add(progressBar, BorderLayout.SOUTH);
 
         downloadButton.addActionListener(e -> startDownload());
         pasteButton.addActionListener(e -> pasteFromClipboard());
         browseButton.addActionListener(e -> browsePath());
+    }
+
+    private JPanel createTopSectionPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JPanel topPanel = createTopPanel();
+        JPanel optionsPanel = createOptionsPanel();
+        
+        panel.add(topPanel, BorderLayout.NORTH);
+        panel.add(optionsPanel, BorderLayout.CENTER);
+        
+        return panel;
     }
 
     private JPanel createTopPanel() {
@@ -63,24 +69,18 @@ public class MainFrame extends JFrame {
 
     private JPanel createOptionsPanel() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 2, 10, 10));
-        panel.setBorder(BorderFactory.createTitledBorder("Download-Optionen"));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+        panel.setLayout(new GridLayout(2, 2, 10, 10));
+        panel.setBorder(BorderFactory.createTitledBorder("Download Options"));
+        panel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
         
-        // Video-Format
-        panel.add(new JLabel("Video-Format:"));
+        // Video Format
+        panel.add(new JLabel("Video Format:"));
         videoFormatCombo = new JComboBox<>(FormatProvider.VIDEO_FORMATS.toArray(new FormatProvider.FormatOption[0]));
         videoFormatCombo.setSelectedIndex(0);
         panel.add(videoFormatCombo);
         
-        // Audio-Format
-        panel.add(new JLabel("Audio-Format/Container:"));
-        audioFormatCombo = new JComboBox<>(FormatProvider.AUDIO_FORMATS.toArray(new FormatProvider.FormatOption[0]));
-        audioFormatCombo.setSelectedIndex(0);
-        panel.add(audioFormatCombo);
-        
-        // Download-Verzeichnis
-        panel.add(new JLabel("Download-Verzeichnis:"));
+        // Download Directory
+        panel.add(new JLabel("Download Directory:"));
         JPanel downloadPathPanel = new JPanel(new BorderLayout());
         downloadPathField.setText(System.getProperty("user.home") + "/Downloads");
         downloadPathPanel.add(downloadPathField, BorderLayout.CENTER);
@@ -95,7 +95,7 @@ public class MainFrame extends JFrame {
         if (clipboardText != null && !clipboardText.isEmpty()) {
             urlField.setText(clipboardText);
         } else {
-            JOptionPane.showMessageDialog(this, "Zwischenablage ist leer oder enthält keinen Text.", "Fehler", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Clipboard is empty or contains no text.", "Error", JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -113,15 +113,14 @@ public class MainFrame extends JFrame {
     private void startDownload() {
         String url = urlField.getText();
         if (url.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Bitte URL eingeben.", "Fehler", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please enter a URL.", "Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
         String downloadPath = downloadPathField.getText();
         String videoFormat = ((FormatProvider.FormatOption) videoFormatCombo.getSelectedItem()).getValue();
-        String audioFormat = ((FormatProvider.FormatOption) audioFormatCombo.getSelectedItem()).getValue();
         
-        logArea.setText(""); // Log leeren
+        logArea.setText(""); // Clear log
         downloadButton.setEnabled(false);
         
         DownloaderService service = new DownloaderService();
@@ -132,13 +131,12 @@ public class MainFrame extends JFrame {
                     url,
                     downloadPath,
                     videoFormat,
-                    audioFormat,
                     progress -> SwingUtilities.invokeLater(() -> progressBar.setValue(progress)),
                     log -> SwingUtilities.invokeLater(() -> logArea.append(log + "\n"))
                 );
-                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Download abgeschlossen!", "Erfolg", JOptionPane.INFORMATION_MESSAGE));
+                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Download completed!", "Success", JOptionPane.INFORMATION_MESSAGE));
             } catch (Exception e) {
-                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Fehler: " + e.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE));
+                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE));
             } finally {
                 SwingUtilities.invokeLater(() -> downloadButton.setEnabled(true));
             }

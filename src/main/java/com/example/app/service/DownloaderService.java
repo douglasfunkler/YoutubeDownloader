@@ -10,25 +10,21 @@ import java.util.regex.Pattern;
 public class DownloaderService {
 
     /**
-     * Download mit Standard-Optionen (für Rückwärts-Kompatibilität)
+     * Download with default options (for backward compatibility)
      */
     public void download(String url, ProgressListener progressListener, LogListener logListener) {
-        download(url, System.getProperty("user.home") + "/Downloads", "bestvideo*+bestaudio/best", "mp4", progressListener, logListener);
+        download(url, System.getProperty("user.home") + "/Downloads", "bestvideo*+bestaudio/best", progressListener, logListener);
     }
 
     /**
-     * Download mit benutzerdefinierten Optionen
+     * Download with custom options
      */
-    public void download(String url, String downloadPath, String videoFormat, String audioFormat, ProgressListener progressListener, LogListener logListener) {
-        // Baue den Befehl dynamisch auf
+    public void download(String url, String downloadPath, String videoFormat, ProgressListener progressListener, LogListener logListener) {
+        // Build command dynamically
         List<String> commandList = new ArrayList<>();
         commandList.add("yt-dlp.exe");
         commandList.add("-f");
         commandList.add(videoFormat);
-        commandList.add("--merge-output-format");
-        commandList.add(audioFormat);
-        commandList.add("--remux-video");
-        commandList.add(audioFormat);
         commandList.add("--ffmpeg-location");
         commandList.add("ffmpeg/bin");
         commandList.add("--no-playlist");

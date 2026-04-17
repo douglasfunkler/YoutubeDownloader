@@ -6,19 +6,19 @@ import java.util.List;
 public class FormatProvider {
 
     /**
-     * Verfügbare Video-Format/Qualitäts-Optionen
+     * Available video format/quality options
      */
     public static final List<FormatOption> VIDEO_FORMATS = Arrays.asList(
-            new FormatOption("Bestes verfügbar", "bestvideo*+bestaudio/best"),
+            new FormatOption("Best available", "bestvideo*+bestaudio/best"),
             new FormatOption("1080p (HD)", "bestvideo[height<=1080]+bestaudio/best[height<=1080]"),
             new FormatOption("720p (HD)", "bestvideo[height<=720]+bestaudio/best[height<=720]"),
             new FormatOption("480p (SD)", "bestvideo[height<=480]+bestaudio/best[height<=480]"),
             new FormatOption("360p (SD)", "bestvideo[height<=360]+bestaudio/best[height<=360]"),
-            new FormatOption("Nur Audio", "bestaudio/best")
+            new FormatOption("Audio only", "bestaudio/best")
     );
 
     /**
-     * Verfügbare Audio-Format/Container-Optionen
+     * Available audio format/container options
      */
     public static final List<FormatOption> AUDIO_FORMATS = Arrays.asList(
             new FormatOption("MP4 (MP4 Video)", "mp4"),
@@ -29,10 +29,10 @@ public class FormatProvider {
     );
 
     /**
-     * Gibt den yt-dlp Format-String basierend auf Video- und Audio-Auswahl zurück
+     * Returns the yt-dlp format string based on video and audio selection
      */
     public static String getFormatCommand(String videoFormatValue, String audioFormatValue) {
-        // videoFormatValue enthält bereits den kompletten yt-dlp Format-String
+        // videoFormatValue already contains the complete yt-dlp format string
         return videoFormatValue;
     }
 
