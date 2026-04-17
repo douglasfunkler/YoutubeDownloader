@@ -10,14 +10,16 @@ import java.io.File;
 
 public class MainFrame extends JFrame {
 
-    private JTextField urlField = new JTextField();
-    private JButton downloadButton = new JButton("Download");
-    private JButton pasteButton = new JButton("Paste");
-    private JButton browseButton = new JButton("Browse");
-    private JTextArea logArea = new JTextArea();
-    private JProgressBar progressBar = new JProgressBar(0, 100);
+    private final JTextField urlField = new JTextField();
+    private final JButton downloadButton = new JButton("Download");
+    private final JButton pasteButton = new JButton("Paste");
+    private final JButton browseButton = new JButton("Browse");
+    private final JTextArea logArea = new JTextArea();
+    private final JProgressBar progressBar = new JProgressBar(0, 100);
     
-    private JTextField downloadPathField = new JTextField();
+    private static final int PROGRESS_BAR_HEIGHT = 13;
+    
+    private final JTextField downloadPathField = new JTextField();
     private JComboBox<FormatProvider.FormatOption> videoFormatCombo;
 
     public MainFrame() {
@@ -32,6 +34,9 @@ public class MainFrame extends JFrame {
 
         add(topSectionPanel, BorderLayout.NORTH);
         add(new JScrollPane(logArea), BorderLayout.CENTER);
+        
+        // Set progress bar height
+        progressBar.setPreferredSize(new Dimension(Integer.MAX_VALUE, PROGRESS_BAR_HEIGHT));
         add(progressBar, BorderLayout.SOUTH);
 
         downloadButton.addActionListener(e -> startDownload());
