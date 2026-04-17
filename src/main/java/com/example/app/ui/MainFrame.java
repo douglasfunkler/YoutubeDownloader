@@ -1,6 +1,7 @@
 package com.example.app.ui;
 
 import com.example.app.service.DownloaderService;
+import com.example.app.service.UpdateService;
 import com.example.app.util.ClipboardHelper;
 import com.example.app.util.FormatProvider;
 
@@ -14,13 +15,13 @@ public class MainFrame extends JFrame {
     private final JButton downloadButton = new JButton("Download");
     private final JButton pasteButton = new JButton("Paste");
     private final JButton browseButton = new JButton("Browse");
-    private final JTextArea logArea = new JTextArea();
     private final JProgressBar progressBar = new JProgressBar(0, 100);
     
     private static final int PROGRESS_BAR_HEIGHT = 13;
     
     private final JTextField downloadPathField = new JTextField();
     private JComboBox<FormatProvider.FormatOption> videoFormatCombo;
+    private final JTextArea logArea = new JTextArea();
 
     public MainFrame() {
         setTitle("yt-dlp Downloader");
@@ -46,6 +47,10 @@ public class MainFrame extends JFrame {
         JButton clearLogButton = new JButton("Clear Log");
         rightButtonPanel.add(clearLogButton);
         logButtonPanel.add(rightButtonPanel, BorderLayout.EAST);
+        JPanel centerButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton updateButton = new JButton("Update yt-dlp");
+        centerButtonPanel.add(updateButton);
+        logButtonPanel.add(centerButtonPanel, BorderLayout.CENTER);
         logPanel.add(logButtonPanel, BorderLayout.SOUTH);
         add(logPanel, BorderLayout.CENTER);
         
@@ -63,6 +68,25 @@ public class MainFrame extends JFrame {
         });
 
         themeButton.addActionListener(e -> switchTheme());
+
+        updateButton.addActionListener(e -> {
+            updateButton.setEnabled(false);
+            new Thread(() -> {
+                try {
+                    UpdateService service = new UpdateService();
+                    service.updateYtDlp();
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this, "yt-dlp updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        updateButton.setEnabled(true);
+                    });
+                } catch (Exception ex) {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this, "Update failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        updateButton.setEnabled(true);
+                    });
+                }
+            }).start();
+        });
     }
 
     private JPanel createTopSectionPanel() {
@@ -164,8 +188,8 @@ public class MainFrame extends JFrame {
                     log -> SwingUtilities.invokeLater(() -> logArea.append(log + "\n"))
                 );
                 SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Download completed!", "Success", JOptionPane.INFORMATION_MESSAGE));
-            } catch (Exception e) {
-                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE));
+            } catch (final Exception exception) {
+                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Error: " + exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE));
             } finally {
                 SwingUtilities.invokeLater(() -> downloadButton.setEnabled(true));
             }
@@ -183,8 +207,8 @@ public class MainFrame extends JFrame {
             }
             // Update all components to reflect the new theme
             SwingUtilities.updateComponentTreeUI(this);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Failed to switch theme: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (final Exception exception) {
+            exception.printStackTrace();
         }
     }
 }
