@@ -7,6 +7,7 @@ import com.example.app.util.FormatProvider;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -58,10 +59,12 @@ public class MainFrame extends JFrame {
         JButton clearLogButton = new JButton("Clear Log");
         rightButtonPanel.add(clearLogButton);
         logButtonPanel.add(rightButtonPanel, BorderLayout.EAST);
-        JPanel centerButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton updateButton = new JButton("Update yt-dlp");
-        centerButtonPanel.add(updateButton);
-        logButtonPanel.add(centerButtonPanel, BorderLayout.CENTER);
+         JPanel centerButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+         JButton updateButton = new JButton("Update yt-dlp");
+         centerButtonPanel.add(updateButton);
+         JButton donateButton = new JButton("Donate");
+         centerButtonPanel.add(donateButton);
+         logButtonPanel.add(centerButtonPanel, BorderLayout.CENTER);
         logPanel.add(logButtonPanel, BorderLayout.SOUTH);
         add(logPanel, BorderLayout.CENTER);
         
@@ -97,6 +100,14 @@ public class MainFrame extends JFrame {
                     });
                 }
             }).start();
+        });
+
+        donateButton.addActionListener(e -> {
+            try {
+                Desktop.getDesktop().browse(new java.net.URI("https://github.com/yt-dlp/yt-dlp#contributing"));
+            } catch (final Exception exception) {
+                JOptionPane.showMessageDialog(this, "Could not open donation link: " + exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 
