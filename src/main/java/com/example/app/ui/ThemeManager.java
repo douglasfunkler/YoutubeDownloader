@@ -8,9 +8,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.FontUIResource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.util.Properties;
 
 public class ThemeManager {
@@ -90,10 +89,9 @@ public class ThemeManager {
      * Save the current theme preference to the configuration file
      */
     private static void saveThemePreference(final String theme) {
-        final Properties properties = new Properties();
-        properties.setProperty(THEME_KEY, theme);
-        try (final OutputStream output = new FileOutputStream(CONFIG_FILE)) {
-            properties.store(output, "Theme configuration");
+        try (final FileWriter writer = new FileWriter(CONFIG_FILE)) {
+            writer.write(THEME_KEY + "=" + theme);
+            writer.flush();
         } catch (final IOException ioException) {
             System.err.println("Failed to save theme configuration: " + ioException.getMessage());
             ioException.printStackTrace();
