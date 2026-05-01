@@ -2,6 +2,8 @@ package com.example.app.service;
 
 import com.example.app.util.ProcessExecutor;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -9,9 +11,20 @@ import java.util.regex.Pattern;
 
 public class DownloaderService {
 
-    /**
-     * Download with custom options
-     */
+    public String getTitle(String url) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("yt-dlp.exe", "--get-title", "--no-playlist", url);
+            // Do NOT redirect stderr — only stdout contains the title; warnings go to stderr
+            Process process = pb.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = reader.readLine();
+            process.waitFor();
+            return line != null ? line.trim() : "";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     public void download(String url, String downloadPath, String videoFormat, ProgressListener progressListener, LogListener logListener) {
         // Build command dynamically
         List<String> commandList = new ArrayList<>();

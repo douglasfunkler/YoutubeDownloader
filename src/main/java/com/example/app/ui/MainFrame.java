@@ -9,10 +9,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.Desktop;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-
-import javax.swing.*;
 
 public class MainFrame extends JFrame {
 
@@ -20,17 +20,22 @@ public class MainFrame extends JFrame {
     private final JButton downloadButton = new JButton("Download");
     private final JButton pasteButton = new JButton("Paste");
     private final JButton browseButton = new JButton("Browse");
-    private final JProgressBar progressBar = new JProgressBar(0, 100);
-    
+
     private static final int PROGRESS_BAR_HEIGHT = 13;
-    
+    private static final int MAX_TAB_TITLE_LENGTH = 30;
+
     private final JTextField downloadPathField = new JTextField();
     private JComboBox<FormatProvider.FormatOption> videoFormatCombo;
-    private final JTextArea logArea = new JTextArea();
+    private final JTabbedPane tabbedPane = new JTabbedPane();
+    private final Map<Integer, DownloadTabPanel> downloadTabs = new HashMap<>();
+    private int tabCounter = 0;
+
+    private Icon checkIcon;
+    private Icon errorIcon;
 
     public MainFrame() {
         setTitle("yt-dlp Downloader");
-        setSize(800, 600);
+        setSize(900, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         setLocationRelativeTo(null);
@@ -42,43 +47,50 @@ public class MainFrame extends JFrame {
             exception.printStackTrace();
         }
 
+        try {
+            checkIcon = new FlatSVGIcon(getClass().getResource("/check.svg")).derive(14, 14);
+            errorIcon = new FlatSVGIcon(getClass().getResource("/error.svg")).derive(14, 14);
+        } catch (final Exception exception) {
+            exception.printStackTrace();
+        }
+
         // Combined panel for URL and options
         JPanel topSectionPanel = createTopSectionPanel();
 
         add(topSectionPanel, BorderLayout.NORTH);
         
-        // Log area with clear button in bottom right and theme button in bottom left
-        JPanel logPanel = new JPanel(new BorderLayout());
-        logPanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
-        JPanel logButtonPanel = new JPanel(new BorderLayout());
+        // Tabbed pane for downloads
+        tabbedPane.setTabPlacement(JTabbedPane.TOP);
+        add(tabbedPane, BorderLayout.CENTER);
+        
+        // Button panel with theme, clear, update, and donate buttons
+        JPanel buttonPanel = new JPanel(new BorderLayout());
         JPanel leftButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton themeButton = new JButton("Switch Theme");
         leftButtonPanel.add(themeButton);
-        logButtonPanel.add(leftButtonPanel, BorderLayout.WEST);
-        JPanel rightButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton clearLogButton = new JButton("Clear Log");
-        rightButtonPanel.add(clearLogButton);
-        logButtonPanel.add(rightButtonPanel, BorderLayout.EAST);
-         JPanel centerButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-         JButton updateButton = new JButton("Update yt-dlp");
-         centerButtonPanel.add(updateButton);
-         JButton donateButton = new JButton("Donate");
-         centerButtonPanel.add(donateButton);
-         logButtonPanel.add(centerButtonPanel, BorderLayout.CENTER);
-        logPanel.add(logButtonPanel, BorderLayout.SOUTH);
-        add(logPanel, BorderLayout.CENTER);
+        buttonPanel.add(leftButtonPanel, BorderLayout.WEST);
         
-        // Set progress bar height
-        progressBar.setPreferredSize(new Dimension(Integer.MAX_VALUE, PROGRESS_BAR_HEIGHT));
-        add(progressBar, BorderLayout.SOUTH);
+        JPanel rightButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton clearAllButton = new JButton("Clear All Tabs");
+        rightButtonPanel.add(clearAllButton);
+        buttonPanel.add(rightButtonPanel, BorderLayout.EAST);
+        
+        JPanel centerButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton updateButton = new JButton("Update yt-dlp");
+        centerButtonPanel.add(updateButton);
+        JButton donateButton = new JButton("Donate");
+        centerButtonPanel.add(donateButton);
+        buttonPanel.add(centerButtonPanel, BorderLayout.CENTER);
+        
+        add(buttonPanel, BorderLayout.SOUTH);
 
         downloadButton.addActionListener(e -> startDownload());
         pasteButton.addActionListener(e -> pasteFromClipboard());
         browseButton.addActionListener(e -> browsePath());
 
-        clearLogButton.addActionListener(e -> {
-            logArea.setText("");
-            progressBar.setValue(0);
+        clearAllButton.addActionListener(e -> {
+            tabbedPane.removeAll();
+            downloadTabs.clear();
         });
 
         themeButton.addActionListener(e -> switchTheme());
@@ -195,27 +207,70 @@ public class MainFrame extends JFrame {
         String downloadPath = downloadPathField.getText();
         String videoFormat = ((FormatProvider.FormatOption) videoFormatCombo.getSelectedItem()).getValue();
         
-        logArea.setText(""); // Clear log
-        downloadButton.setEnabled(false);
+        // Create a new tab for this download
+        DownloadTabPanel downloadTab = new DownloadTabPanel();
+        int tabIndex = tabCounter++;
+        downloadTabs.put(tabIndex, downloadTab);
+        tabbedPane.addTab("Downloading...", downloadTab);
+        tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
         
         DownloaderService service = new DownloaderService();
 
         new Thread(() -> {
             try {
+                String fetchedTitle = service.getTitle(url);
+                if (!fetchedTitle.isEmpty()) {
+                    SwingUtilities.invokeLater(() -> updateTabTitle(tabIndex, truncateTitle(fetchedTitle)));
+                }
+
                 service.download(
                     url,
                     downloadPath,
                     videoFormat,
-                    progress -> SwingUtilities.invokeLater(() -> progressBar.setValue(progress)),
-                    log -> SwingUtilities.invokeLater(() -> logArea.append(log + "\n"))
+                    progress -> SwingUtilities.invokeLater(() -> downloadTab.setProgress(progress)),
+                    log -> SwingUtilities.invokeLater(() -> downloadTab.appendLog(log))
                 );
-                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Download completed!", "Success", JOptionPane.INFORMATION_MESSAGE));
+
+                SwingUtilities.invokeLater(() -> {
+                    String displayTitle = fetchedTitle.isEmpty() ? "Download " + tabIndex : fetchedTitle;
+                    updateTabTitle(tabIndex, truncateTitle(displayTitle));
+                    setTabIcon(tabIndex, checkIcon);
+                    JOptionPane.showMessageDialog(this, "Download completed!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                });
             } catch (final Exception exception) {
-                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Error: " + exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE));
-            } finally {
-                SwingUtilities.invokeLater(() -> downloadButton.setEnabled(true));
+                SwingUtilities.invokeLater(() -> {
+                    updateTabTitle(tabIndex, "Error - Download " + tabIndex);
+                    setTabIcon(tabIndex, errorIcon);
+                    downloadTab.appendLog("\n[ERROR] " + exception.getMessage());
+                    JOptionPane.showMessageDialog(this, "Error: " + exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                });
             }
         }).start();
+    }
+
+    private String truncateTitle(String title) {
+        if (title.length() > MAX_TAB_TITLE_LENGTH) {
+            return title.substring(0, MAX_TAB_TITLE_LENGTH - 3) + "...";
+        }
+        return title;
+    }
+
+    private void updateTabTitle(int tabIndex, String title) {
+        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+            if (downloadTabs.get(tabIndex) == tabbedPane.getComponentAt(i)) {
+                tabbedPane.setTitleAt(i, title);
+                break;
+            }
+        }
+    }
+
+    private void setTabIcon(int tabIndex, Icon icon) {
+        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+            if (downloadTabs.get(tabIndex) == tabbedPane.getComponentAt(i)) {
+                tabbedPane.setIconAt(i, icon);
+                break;
+            }
+        }
     }
 
     private void switchTheme() {
