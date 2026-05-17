@@ -48,16 +48,5 @@ public class DownloadTabPanel extends JPanel {
         progressBar.setValue(progress);
     }
 
-    public int getProgress() {
-        return progressBar.getValue();
-    }
-
-    public String getExtractedTitle() {
-        return extractedTitle;
-    }
-
-    public JTextArea getLogArea() {
-        return logArea;
-    }
 }
 

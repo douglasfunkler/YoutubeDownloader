@@ -39,7 +39,7 @@ public class ThemeManager {
     }
 
     /**
-     * Switch to dark theme (can be extended if needed)
+     * Switch to the dark theme
      */
     public static void setDarkTheme() {
         try {
@@ -52,7 +52,7 @@ public class ThemeManager {
     }
 
     /**
-     * Switch to light theme
+     * Switch to a light theme
      */
     public static void setLightTheme() {
         try {

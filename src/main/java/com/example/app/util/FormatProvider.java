@@ -6,7 +6,7 @@ import java.util.List;
 public class FormatProvider {
 
     /**
-     * Available video format/quality options
+     * Available video/audio format/quality options
      */
     public static final List<FormatOption> VIDEO_FORMATS = Arrays.asList(
             new FormatOption("Best available", "bestvideo*+bestaudio/best"),
@@ -17,28 +17,6 @@ public class FormatProvider {
             new FormatOption("Audio only", "bestaudio/best")
     );
 
-    /**
-     * Available audio format/container options
-     */
-    public static final List<FormatOption> AUDIO_FORMATS = Arrays.asList(
-            new FormatOption("MP4 (MP4 Video)", "mp4"),
-            new FormatOption("WebM (VP9/Vorbis)", "webm"),
-            new FormatOption("MKV (Matroska)", "mkv"),
-            new FormatOption("AVI (AVI)", "avi"),
-            new FormatOption("MOV (QuickTime)", "mov")
-    );
-
-    /**
-     * Returns the yt-dlp format string based on video and audio selection
-     */
-    public static String getFormatCommand(String videoFormatValue, String audioFormatValue) {
-        // videoFormatValue already contains the complete yt-dlp format string
-        return videoFormatValue;
-    }
-
-    /**
-     * Wrapper-Klasse für Format-Optionen
-     */
     public static class FormatOption {
         private final String label;
         private final String value;
@@ -46,10 +24,6 @@ public class FormatProvider {
         public FormatOption(String label, String value) {
             this.label = label;
             this.value = value;
-        }
-
-        public String getLabel() {
-            return label;
         }
 
         public String getValue() {

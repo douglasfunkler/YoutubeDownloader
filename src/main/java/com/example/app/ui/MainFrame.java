@@ -11,6 +11,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
@@ -21,7 +22,6 @@ public class MainFrame extends JFrame {
     private final JButton pasteButton = new JButton("Paste");
     private final JButton browseButton = new JButton("Browse");
 
-    private static final int PROGRESS_BAR_HEIGHT = 13;
     private static final int MAX_TAB_TITLE_LENGTH = 30;
 
     private final JTextField downloadPathField = new JTextField();
@@ -205,7 +205,7 @@ public class MainFrame extends JFrame {
         }
         
         String downloadPath = downloadPathField.getText();
-        String videoFormat = ((FormatProvider.FormatOption) videoFormatCombo.getSelectedItem()).getValue();
+        String videoFormat = ((FormatProvider.FormatOption) Objects.requireNonNull(videoFormatCombo.getSelectedItem())).getValue();
         
         // Create a new tab for this download
         DownloadTabPanel downloadTab = new DownloadTabPanel();
