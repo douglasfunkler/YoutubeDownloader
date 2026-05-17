@@ -7,10 +7,6 @@ import java.io.IOException;
 
 public class ClipboardHelper {
 
-    /**
-     * Liest Text aus der Zwischenablage
-     * @return Der Text aus der Zwischenablage, oder null wenn keine Daten verfügbar sind
-     */
     public static String getClipboardText() {
         try {
             Toolkit toolkit = Toolkit.getDefaultToolkit();
@@ -20,25 +16,11 @@ public class ClipboardHelper {
             if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
                 return (String) transferable.getTransferData(DataFlavor.stringFlavor);
             }
-        } catch (UnsupportedFlavorException | IOException e) {
-            e.printStackTrace();
+        } catch (final UnsupportedFlavorException | IOException exception) {
+            exception.printStackTrace();
         }
         return null;
     }
 
-    /**
-     * Überprüft, ob die Zwischenablage einen Text enthält
-     * @return true wenn Text vorhanden ist
-     */
-    public static boolean hasClipboardText() {
-        try {
-            Toolkit toolkit = Toolkit.getDefaultToolkit();
-            java.awt.datatransfer.Clipboard clipboard = toolkit.getSystemClipboard();
-            java.awt.datatransfer.Transferable transferable = clipboard.getContents(null);
-            return transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor);
-        } catch (Exception e) {
-            return false;
-        }
-    }
 }
 
