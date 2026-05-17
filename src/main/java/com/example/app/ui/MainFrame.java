@@ -29,6 +29,8 @@ public class MainFrame extends JFrame {
     private final JTabbedPane tabbedPane = new JTabbedPane();
     private final Map<Integer, DownloadTabPanel> downloadTabs = new HashMap<>();
     private int tabCounter = 0;
+    private final Map<Integer, JLabel> tabTitleLabels = new HashMap<>();
+    private final Map<Integer, JLabel> tabIconLabels = new HashMap<>();
 
     private Icon checkIcon;
     private Icon errorIcon;
@@ -89,8 +91,21 @@ public class MainFrame extends JFrame {
         browseButton.addActionListener(e -> browsePath());
 
         clearAllButton.addActionListener(e -> {
-            tabbedPane.removeAll();
-            downloadTabs.clear();
+            downloadTabs.entrySet().removeIf(entry -> {
+                if (!entry.getValue().isDownloading()) {
+                    int key = entry.getKey();
+                    for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+                        if (tabbedPane.getComponentAt(i) == entry.getValue()) {
+                            tabbedPane.removeTabAt(i);
+                            break;
+                        }
+                    }
+                    tabTitleLabels.remove(key);
+                    tabIconLabels.remove(key);
+                    return true;
+                }
+                return false;
+            });
         });
 
         themeButton.addActionListener(e -> switchTheme());
@@ -211,8 +226,10 @@ public class MainFrame extends JFrame {
         DownloadTabPanel downloadTab = new DownloadTabPanel();
         int tabIndex = tabCounter++;
         downloadTabs.put(tabIndex, downloadTab);
-        tabbedPane.addTab("Downloading...", downloadTab);
-        tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+        tabbedPane.addTab(null, downloadTab);
+        int uiTabIndex = tabbedPane.getTabCount() - 1;
+        tabbedPane.setTabComponentAt(uiTabIndex, createTabHeader(tabIndex));
+        tabbedPane.setSelectedIndex(uiTabIndex);
         
         DownloaderService service = new DownloaderService();
 
@@ -235,6 +252,7 @@ public class MainFrame extends JFrame {
                     String displayTitle = fetchedTitle.isEmpty() ? "Download " + tabIndex : fetchedTitle;
                     updateTabTitle(tabIndex, truncateTitle(displayTitle));
                     setTabIcon(tabIndex, checkIcon);
+                    downloadTab.setDownloading(false);
                     JOptionPane.showMessageDialog(this, "Download completed!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 });
             } catch (final Exception exception) {
@@ -242,6 +260,7 @@ public class MainFrame extends JFrame {
                     updateTabTitle(tabIndex, "Error - Download " + tabIndex);
                     setTabIcon(tabIndex, errorIcon);
                     downloadTab.appendLog("\n[ERROR] " + exception.getMessage());
+                    downloadTab.setDownloading(false);
                     JOptionPane.showMessageDialog(this, "Error: " + exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 });
             }
@@ -256,21 +275,54 @@ public class MainFrame extends JFrame {
     }
 
     private void updateTabTitle(int tabIndex, String title) {
-        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
-            if (downloadTabs.get(tabIndex) == tabbedPane.getComponentAt(i)) {
-                tabbedPane.setTitleAt(i, title);
-                break;
-            }
+        JLabel label = tabTitleLabels.get(tabIndex);
+        if (label != null) {
+            label.setText(title);
         }
     }
 
     private void setTabIcon(int tabIndex, Icon icon) {
-        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
-            if (downloadTabs.get(tabIndex) == tabbedPane.getComponentAt(i)) {
-                tabbedPane.setIconAt(i, icon);
-                break;
-            }
+        JLabel label = tabIconLabels.get(tabIndex);
+        if (label != null) {
+            label.setIcon(icon);
         }
+    }
+
+    private Component createTabHeader(int tabIndex) {
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        header.setOpaque(false);
+
+        JLabel iconLabel = new JLabel();
+        tabIconLabels.put(tabIndex, iconLabel);
+        header.add(iconLabel);
+
+        JLabel titleLabel = new JLabel("Downloading...");
+        tabTitleLabels.put(tabIndex, titleLabel);
+        header.add(titleLabel);
+
+        JButton closeButton = new JButton("×");
+        closeButton.setPreferredSize(new Dimension(16, 16));
+        closeButton.setMargin(new Insets(0, 0, 0, 0));
+        closeButton.setFocusable(false);
+        closeButton.setBorderPainted(false);
+        closeButton.setContentAreaFilled(false);
+        closeButton.addActionListener(e -> {
+            DownloadTabPanel tab = downloadTabs.get(tabIndex);
+            if (tab != null && !tab.isDownloading()) {
+                for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+                    if (tabbedPane.getComponentAt(i) == tab) {
+                        tabbedPane.removeTabAt(i);
+                        break;
+                    }
+                }
+                downloadTabs.remove(tabIndex);
+                tabTitleLabels.remove(tabIndex);
+                tabIconLabels.remove(tabIndex);
+            }
+        });
+        header.add(closeButton);
+
+        return header;
     }
 
     private void switchTheme() {

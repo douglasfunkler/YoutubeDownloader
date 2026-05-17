@@ -8,6 +8,7 @@ public class DownloadTabPanel extends JPanel {
     private final JTextArea logArea;
     private final JProgressBar progressBar;
     private String extractedTitle = "";
+    private boolean downloading = true;
     private static final int PROGRESS_BAR_HEIGHT = 20;
 
     public DownloadTabPanel() {
@@ -46,6 +47,14 @@ public class DownloadTabPanel extends JPanel {
 
     public void setProgress(int progress) {
         progressBar.setValue(progress);
+    }
+
+    public boolean isDownloading() {
+        return downloading;
+    }
+
+    public void setDownloading(boolean downloading) {
+        this.downloading = downloading;
     }
 
 }
