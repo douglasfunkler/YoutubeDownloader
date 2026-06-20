@@ -15,7 +15,6 @@ repositories {
 dependencies {
     implementation("com.formdev:flatlaf:3.7")
     implementation("com.formdev:flatlaf-extras:3.7")
-    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 application {
