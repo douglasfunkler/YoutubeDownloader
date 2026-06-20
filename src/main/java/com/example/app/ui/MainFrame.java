@@ -15,6 +15,7 @@ import java.util.Objects;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemFileChooser;
+import org.jetbrains.annotations.NotNull;
 
 public class MainFrame extends JFrame {
 
@@ -44,7 +45,7 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
 
         try {
-            FlatSVGIcon icon = new FlatSVGIcon(getClass().getResource("/icon.svg"));
+            final FlatSVGIcon icon = new FlatSVGIcon(getClass().getResource("/icon.svg"));
             setIconImage(icon.getImage());
         } catch (final Exception exception) {
             exception.printStackTrace();
@@ -58,7 +59,7 @@ public class MainFrame extends JFrame {
         }
 
         // Combined panel for URL and options
-        JPanel topSectionPanel = createTopSectionPanel();
+        final JPanel topSectionPanel = createTopSectionPanel();
 
         add(topSectionPanel, BorderLayout.NORTH);
         
@@ -67,21 +68,21 @@ public class MainFrame extends JFrame {
         add(tabbedPane, BorderLayout.CENTER);
         
         // Button panel with theme, clear, update, and donate buttons
-        JPanel buttonPanel = new JPanel(new BorderLayout());
-        JPanel leftButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton themeButton = new JButton("Switch Theme");
+        final JPanel buttonPanel = new JPanel(new BorderLayout());
+        final JPanel leftButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        final JButton themeButton = new JButton("Switch Theme");
         leftButtonPanel.add(themeButton);
         buttonPanel.add(leftButtonPanel, BorderLayout.WEST);
         
-        JPanel rightButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton clearAllButton = new JButton("Clear All Tabs");
+        final JPanel rightButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        final JButton clearAllButton = new JButton("Clear All Tabs");
         rightButtonPanel.add(clearAllButton);
         buttonPanel.add(rightButtonPanel, BorderLayout.EAST);
         
-        JPanel centerButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton updateButton = new JButton("Update yt-dlp");
+        final JPanel centerButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        final JButton updateButton = new JButton("Update yt-dlp");
         centerButtonPanel.add(updateButton);
-        JButton donateButton = new JButton("Donate");
+        final JButton donateButton = new JButton("Donate");
         centerButtonPanel.add(donateButton);
         buttonPanel.add(centerButtonPanel, BorderLayout.CENTER);
         
@@ -94,7 +95,7 @@ public class MainFrame extends JFrame {
         clearAllButton.addActionListener(e -> {
             downloadTabs.entrySet().removeIf(entry -> {
                 if (!entry.getValue().isDownloading()) {
-                    int key = entry.getKey();
+                    final int key = entry.getKey();
                     for (int i = 0; i < tabbedPane.getTabCount(); i++) {
                         if (tabbedPane.getComponentAt(i) == entry.getValue()) {
                             tabbedPane.removeTabAt(i);
@@ -115,7 +116,7 @@ public class MainFrame extends JFrame {
             updateButton.setEnabled(false);
             new Thread(() -> {
                 try {
-                    UpdateService service = new UpdateService();
+                    final UpdateService service = new UpdateService();
                     service.updateYtDlp();
                     SwingUtilities.invokeLater(() -> {
                         JOptionPane.showMessageDialog(this, "yt-dlp updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -139,10 +140,10 @@ public class MainFrame extends JFrame {
         });
     }
 
-    private JPanel createTopSectionPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        JPanel topPanel = createTopPanel();
-        JPanel optionsPanel = createOptionsPanel();
+    private @NotNull JPanel createTopSectionPanel() {
+        final JPanel panel = new JPanel(new BorderLayout());
+        final JPanel topPanel = createTopPanel();
+        final JPanel optionsPanel = createOptionsPanel();
         
         panel.add(topPanel, BorderLayout.NORTH);
         panel.add(optionsPanel, BorderLayout.CENTER);
@@ -150,17 +151,17 @@ public class MainFrame extends JFrame {
         return panel;
     }
 
-    private JPanel createTopPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
+    private @NotNull JPanel createTopPanel() {
+        final JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         
-        JPanel urlPanel = new JPanel(new BorderLayout(10, 0));
-        JLabel urlLabel = new JLabel("URL:");
+        final JPanel urlPanel = new JPanel(new BorderLayout(10, 0));
+        final JLabel urlLabel = new JLabel("URL:");
         urlPanel.add(urlLabel, BorderLayout.WEST);
         urlField.setPreferredSize(new Dimension(0, 30));
         urlPanel.add(urlField, BorderLayout.CENTER);
         
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        final JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.add(pasteButton);
         buttonPanel.add(downloadButton);
         
@@ -170,8 +171,8 @@ public class MainFrame extends JFrame {
         return panel;
     }
 
-    private JPanel createOptionsPanel() {
-        JPanel panel = new JPanel();
+    private @NotNull JPanel createOptionsPanel() {
+        final JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(2, 2, 10, 10));
         panel.setBorder(BorderFactory.createTitledBorder("Download Options"));
         panel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
@@ -184,7 +185,7 @@ public class MainFrame extends JFrame {
         
         // Download Directory
          panel.add(new JLabel("Download Directory:"));
-         JPanel downloadPathPanel = new JPanel(new BorderLayout(5, 0));
+         final JPanel downloadPathPanel = new JPanel(new BorderLayout(5, 0));
          downloadPathField.setText(System.getProperty("user.home") + File.separator + "Desktop");
          downloadPathPanel.add(downloadPathField, BorderLayout.CENTER);
          downloadPathPanel.add(browseButton, BorderLayout.EAST);
@@ -194,7 +195,7 @@ public class MainFrame extends JFrame {
     }
 
     private void pasteFromClipboard() {
-        String clipboardText = ClipboardHelper.getClipboardText();
+        final String clipboardText = ClipboardHelper.getClipboardText();
         if (clipboardText != null && !clipboardText.isEmpty()) {
             urlField.setText(clipboardText);
         } else {
@@ -213,29 +214,29 @@ public class MainFrame extends JFrame {
     }
 
     private void startDownload() {
-        String url = urlField.getText();
+        final String url = urlField.getText();
         if (url.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a URL.", "Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
-        String downloadPath = downloadPathField.getText();
-        String videoFormat = ((FormatProvider.FormatOption) Objects.requireNonNull(videoFormatCombo.getSelectedItem())).getValue();
+        final String downloadPath = downloadPathField.getText();
+        final String videoFormat = ((FormatProvider.FormatOption) Objects.requireNonNull(videoFormatCombo.getSelectedItem())).getValue();
         
         // Create a new tab for this download
-        DownloadTabPanel downloadTab = new DownloadTabPanel();
-        int tabIndex = tabCounter++;
+        final DownloadTabPanel downloadTab = new DownloadTabPanel();
+        final int tabIndex = tabCounter++;
         downloadTabs.put(tabIndex, downloadTab);
         tabbedPane.addTab(null, downloadTab);
         int uiTabIndex = tabbedPane.getTabCount() - 1;
         tabbedPane.setTabComponentAt(uiTabIndex, createTabHeader(tabIndex));
         tabbedPane.setSelectedIndex(uiTabIndex);
         
-        DownloaderService service = new DownloaderService();
+        final DownloaderService service = new DownloaderService();
 
         new Thread(() -> {
             try {
-                String fetchedTitle = service.getTitle(url);
+                final String fetchedTitle = service.getTitle(url);
                 if (!fetchedTitle.isEmpty()) {
                     SwingUtilities.invokeLater(() -> updateTabTitle(tabIndex, truncateTitle(fetchedTitle)));
                 }
@@ -249,7 +250,7 @@ public class MainFrame extends JFrame {
                 );
 
                 SwingUtilities.invokeLater(() -> {
-                    String displayTitle = fetchedTitle.isEmpty() ? "Download " + tabIndex : fetchedTitle;
+                    final String displayTitle = fetchedTitle.isEmpty() ? "Download " + tabIndex : fetchedTitle;
                     updateTabTitle(tabIndex, truncateTitle(displayTitle));
                     setTabIcon(tabIndex, checkIcon);
                     downloadTab.setDownloading(false);
@@ -267,47 +268,47 @@ public class MainFrame extends JFrame {
         }).start();
     }
 
-    private String truncateTitle(String title) {
+    private @NotNull String truncateTitle(@NotNull String title) {
         if (title.length() > MAX_TAB_TITLE_LENGTH) {
             return title.substring(0, MAX_TAB_TITLE_LENGTH - 3) + "...";
         }
         return title;
     }
 
-    private void updateTabTitle(int tabIndex, String title) {
-        JLabel label = tabTitleLabels.get(tabIndex);
+    private void updateTabTitle(final int tabIndex, final @NotNull String title) {
+        final JLabel label = tabTitleLabels.get(tabIndex);
         if (label != null) {
             label.setText(title);
         }
     }
 
-    private void setTabIcon(int tabIndex, Icon icon) {
-        JLabel label = tabIconLabels.get(tabIndex);
+    private void setTabIcon(final int tabIndex, final @NotNull Icon icon) {
+        final JLabel label = tabIconLabels.get(tabIndex);
         if (label != null) {
             label.setIcon(icon);
         }
     }
 
-    private Component createTabHeader(int tabIndex) {
-        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+    private @NotNull Component createTabHeader(final int tabIndex) {
+        final JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
         header.setOpaque(false);
 
-        JLabel iconLabel = new JLabel();
+        final JLabel iconLabel = new JLabel();
         tabIconLabels.put(tabIndex, iconLabel);
         header.add(iconLabel);
 
-        JLabel titleLabel = new JLabel("Downloading...");
+        final JLabel titleLabel = new JLabel("Downloading...");
         tabTitleLabels.put(tabIndex, titleLabel);
         header.add(titleLabel);
 
-        JButton closeButton = new JButton("×");
+        final JButton closeButton = new JButton("×");
         closeButton.setPreferredSize(new Dimension(16, 16));
         closeButton.setMargin(new Insets(0, 0, 0, 0));
         closeButton.setFocusable(false);
         closeButton.setBorderPainted(false);
         closeButton.setContentAreaFilled(false);
         closeButton.addActionListener(e -> {
-            DownloadTabPanel tab = downloadTabs.get(tabIndex);
+            final DownloadTabPanel tab = downloadTabs.get(tabIndex);
             if (tab != null && !tab.isDownloading()) {
                 for (int i = 0; i < tabbedPane.getTabCount(); i++) {
                     if (tabbedPane.getComponentAt(i) == tab) {
@@ -328,7 +329,7 @@ public class MainFrame extends JFrame {
     private void switchTheme() {
         // Determine current theme and switch to the opposite
         try {
-            String currentLaf = UIManager.getLookAndFeel().getClass().getName();
+            final String currentLaf = UIManager.getLookAndFeel().getClass().getName();
             if (currentLaf.contains("FlatDarkLaf")) {
                 ThemeManager.setLightTheme();
             } else {

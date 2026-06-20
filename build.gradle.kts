@@ -15,6 +15,7 @@ repositories {
 dependencies {
     implementation("com.formdev:flatlaf:3.7")
     implementation("com.formdev:flatlaf-extras:3.7")
+    implementation("org.jetbrains:annotations:26.0.2")
 }
 
 application {
