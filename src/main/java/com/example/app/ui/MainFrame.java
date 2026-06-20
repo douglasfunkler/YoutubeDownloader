@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.util.SystemFileChooser;
 
 public class MainFrame extends JFrame {
 
@@ -202,12 +203,11 @@ public class MainFrame extends JFrame {
     }
 
     private void browsePath() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        final SystemFileChooser fileChooser = new SystemFileChooser();
+        fileChooser.setFileSelectionMode(SystemFileChooser.DIRECTORIES_ONLY);
         fileChooser.setCurrentDirectory(new File(downloadPathField.getText()));
-        
-        int returnValue = fileChooser.showOpenDialog(this);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
+
+        if (fileChooser.showOpenDialog(this) == SystemFileChooser.APPROVE_OPTION) {
             downloadPathField.setText(fileChooser.getSelectedFile().getAbsolutePath());
         }
     }
