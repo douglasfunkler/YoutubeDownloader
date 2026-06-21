@@ -81,7 +81,6 @@ public class MainFrame extends JFrame {
         buttonPanel.add(rightButtonPanel, BorderLayout.EAST);
         
         final JPanel centerButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        final JButton updateButton = new JButton("Update yt-dlp");
         centerButtonPanel.add(updateButton);
         final JButton donateButton = new JButton("Donate");
         centerButtonPanel.add(donateButton);
@@ -238,9 +237,7 @@ public class MainFrame extends JFrame {
         new Thread(() -> {
             try {
                 if (!new File("yt-dlp.exe").exists()) {
-                    SwingUtilities.invokeLater(() -> updateButton.setEnabled(false));
                     new UpdateService().updateYtDlp();
-                    SwingUtilities.invokeLater(() -> updateButton.setEnabled(true));
                 }
 
                 final String fetchedTitle = service.getTitle(url);
