@@ -23,6 +23,7 @@ public class MainFrame extends JFrame {
     private final JButton downloadButton = new JButton("Download");
     private final JButton pasteButton = new JButton("Paste");
     private final JButton browseButton = new JButton("Browse");
+    private final JButton updateButton = new JButton("Update yt-dlp");
 
     private static final int MAX_TAB_TITLE_LENGTH = 30;
 
