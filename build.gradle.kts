@@ -35,6 +35,10 @@ tasks.register<Exec>("distWindows") {
     group = "distribution"
     dependsOn("collectJars")
 
+    doFirst {
+        layout.buildDirectory.dir("dist/YtDlpDesktop").get().asFile.deleteRecursively()
+    }
+
     commandLine(
         "jpackage",
         "--name", "YtDlpDesktop",
