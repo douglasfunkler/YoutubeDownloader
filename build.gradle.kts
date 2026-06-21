@@ -36,16 +36,17 @@ tasks.register<Exec>("distWindows") {
     dependsOn("collectJars")
 
     doFirst {
-        layout.buildDirectory.dir("dist/YtDlpDesktop").get().asFile.deleteRecursively()
+        layout.buildDirectory.dir("dist/YouTube Downloader").get().asFile.deleteRecursively()
     }
 
     commandLine(
         "jpackage",
-        "--name", "YtDlpDesktop",
+        "--name", "YouTube Downloader",
         "--input", layout.buildDirectory.dir("package-input").get().asFile.absolutePath,
         "--main-jar", tasks.named<Jar>("jar").get().archiveFileName.get(),
         "--main-class", "com.example.app.Main",
         "--type", "app-image",
+        "--icon", layout.projectDirectory.file("src/main/resources/icon.ico").asFile.absolutePath,
         "--dest", layout.buildDirectory.dir("dist").get().asFile.absolutePath
     )
 }
