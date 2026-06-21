@@ -1,5 +1,7 @@
 package com.example.app.ui;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -21,7 +23,7 @@ public class DownloadTabPanel extends JPanel {
         logArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         logArea.setLineWrap(true);
         logArea.setWrapStyleWord(true);
-        JScrollPane scrollPane = new JScrollPane(logArea);
+        final JScrollPane scrollPane = new JScrollPane(logArea);
         add(scrollPane, BorderLayout.CENTER);
 
         // Progress bar
@@ -31,21 +33,21 @@ public class DownloadTabPanel extends JPanel {
         add(progressBar, BorderLayout.SOUTH);
     }
 
-    public void appendLog(String log) {
+    public void appendLog(final @NotNull String log) {
         logArea.append(log + "\n");
         logArea.setCaretPosition(logArea.getDocument().getLength());
         
         // Try to extract video title from log
         if (log.contains("Downloading") && log.contains("\"")) {
-            int start = log.indexOf("\"") + 1;
-            int end = log.lastIndexOf("\"");
+            final int start = log.indexOf("\"") + 1;
+            final int end = log.lastIndexOf("\"");
             if (end > start && extractedTitle.isEmpty()) {
                 extractedTitle = log.substring(start, end);
             }
         }
     }
 
-    public void setProgress(int progress) {
+    public void setProgress(final int progress) {
         progressBar.setValue(progress);
     }
 
@@ -53,7 +55,7 @@ public class DownloadTabPanel extends JPanel {
         return downloading;
     }
 
-    public void setDownloading(boolean downloading) {
+    public void setDownloading(final boolean downloading) {
         this.downloading = downloading;
     }
 
