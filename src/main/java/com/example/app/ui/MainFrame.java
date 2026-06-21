@@ -230,6 +230,12 @@ public class MainFrame extends JFrame {
 
         new Thread(() -> {
             try {
+                if (!new File("yt-dlp.exe").exists()) {
+                    SwingUtilities.invokeLater(() -> updateButton.setEnabled(false));
+                    new UpdateService().updateYtDlp();
+                    SwingUtilities.invokeLater(() -> updateButton.setEnabled(true));
+                }
+
                 final String fetchedTitle = service.getTitle(url);
                 if (!fetchedTitle.isEmpty()) {
                     SwingUtilities.invokeLater(() -> updateTabTitle(tabIndex, truncateTitle(fetchedTitle)));
