@@ -7,8 +7,6 @@ import com.example.app.util.FormatProvider;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.Desktop;
 import java.io.File;
 import java.util.HashMap;
@@ -25,7 +23,6 @@ public class MainFrame extends JFrame {
     private final JButton downloadButton = new JButton("Download");
     private final JButton pasteButton = new JButton("Paste");
     private final JButton browseButton = new JButton("Browse");
-    private final JButton updateButton = new JButton("Update yt-dlp");
 
     private static final int MAX_TAB_TITLE_LENGTH = 30;
 
@@ -83,6 +80,7 @@ public class MainFrame extends JFrame {
         buttonPanel.add(rightButtonPanel, BorderLayout.EAST);
         
         final JPanel centerButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        final JButton updateButton = new JButton("Update yt-dlp");
         centerButtonPanel.add(updateButton);
         final JButton donateButton = new JButton("Donate");
         centerButtonPanel.add(donateButton);
@@ -114,15 +112,23 @@ public class MainFrame extends JFrame {
 
         themeButton.addActionListener(e -> switchTheme());
 
-        updateButton.addActionListener(e -> triggerUpdate());
-
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowOpened(final WindowEvent e) {
-                if (!new File("yt-dlp.exe").exists()) {
-                    triggerUpdate();
+        updateButton.addActionListener(e -> {
+            updateButton.setEnabled(false);
+            new Thread(() -> {
+                try {
+                    final UpdateService service = new UpdateService();
+                    service.updateYtDlp();
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this, "yt-dlp updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        updateButton.setEnabled(true);
+                    });
+                } catch (final Exception exception) {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this, "Update failed: " + exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        updateButton.setEnabled(true);
+                    });
                 }
-            }
+            }).start();
         });
 
         donateButton.addActionListener(e -> {
@@ -324,24 +330,6 @@ public class MainFrame extends JFrame {
         header.add(closeButton);
 
         return header;
-    }
-
-    private void triggerUpdate() {
-        updateButton.setEnabled(false);
-        new Thread(() -> {
-            try {
-                new UpdateService().updateYtDlp();
-                SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(this, "yt-dlp updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                    updateButton.setEnabled(true);
-                });
-            } catch (final Exception exception) {
-                SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(this, "Update failed: " + exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    updateButton.setEnabled(true);
-                });
-            }
-        }).start();
     }
 
     private void switchTheme() {
