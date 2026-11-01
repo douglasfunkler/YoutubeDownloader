@@ -44,8 +44,15 @@ fun Exec.configureJpackage(icon: String) {
     group = "distribution"
     dependsOn("collectJars")
     doFirst {
-        layout.buildDirectory.dir("dist/$appName").get().asFile.deleteRecursively()
-        layout.buildDirectory.dir("dist/$appName.app").get().asFile.deleteRecursively()
+        listOf("dist/$appName", "dist/$appName.app").forEach { path ->
+            val dir = layout.buildDirectory.dir(path).get().asFile
+            if (!dir.deleteRecursively()) {
+                throw GradleException(
+                    "Could not delete ${dir.absolutePath}. Close the app and any Explorer/terminal " +
+                    "windows open in that folder, then try again."
+                )
+            }
+        }
         executable = jpackageExecutable.get()
     }
     args(
