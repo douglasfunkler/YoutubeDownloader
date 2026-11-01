@@ -1,3 +1,8 @@
+import java.net.URI
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.security.MessageDigest
+
 plugins {
     application
 }
@@ -68,6 +73,91 @@ fun Exec.configureJpackage(icon: String) {
     )
 }
 
+// --- External Windows binaries (not in git; fetched on demand) ---
+// To upgrade: change the version and SHA-256 (published on each GitHub release), then delete
+// the local yt-dlp.exe / ffmpeg folder so the new version is downloaded.
+val ytDlpVersion = "2026.10.26"
+val ytDlpSha256 = "f5389d3698ecde4ef06f4e6b1ce0294fe9ac1396228c8990b8d3416d6d177a7d"
+val ffmpegVersion = "9.0.2"
+val ffmpegZipSha256 = "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba"
+
+fun downloadVerified(url: String, target: File, expectedSha256: String) {
+    target.parentFile.mkdirs()
+    val tmp = File(target.parentFile, target.name + ".part")
+    logger.lifecycle("Downloading $url")
+    URI(url).toURL().openStream().use { input ->
+        tmp.outputStream().use { input.copyTo(it) }
+    }
+    val digest = MessageDigest.getInstance("SHA-256")
+    tmp.inputStream().use { input ->
+        val buf = ByteArray(1 shl 16)
+        while (true) {
+            val n = input.read(buf)
+            if (n < 0) break
+            digest.update(buf, 0, n)
+        }
+    }
+    val actual = digest.digest().joinToString("") { "%02x".format(it) }
+    if (!actual.equals(expectedSha256, ignoreCase = true)) {
+        tmp.delete()
+        throw GradleException("Checksum mismatch for $url\n  expected $expectedSha256\n  actual   $actual")
+    }
+    Files.move(tmp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+}
+
+// Skipped if yt-dlp.exe already exists, so a version updated by the app is kept
+val downloadYtDlp = tasks.register("downloadYtDlp") {
+    group = "setup"
+    description = "Downloads yt-dlp.exe $ytDlpVersion into the project root if missing"
+    val target = layout.projectDirectory.file("yt-dlp.exe").asFile
+    onlyIf { !target.exists() }
+    doLast {
+        downloadVerified(
+            "https://github.com/yt-dlp/yt-dlp/releases/download/$ytDlpVersion/yt-dlp.exe",
+            target, ytDlpSha256
+        )
+    }
+}
+
+val ffmpegZip = layout.buildDirectory.file("downloads/ffmpeg-$ffmpegVersion-essentials_build.zip")
+val ffmpegBin = layout.projectDirectory.dir("ffmpeg/bin")
+
+val downloadFfmpegZip = tasks.register("downloadFfmpegZip") {
+    val zip = ffmpegZip.get().asFile
+    onlyIf { !ffmpegBin.file("ffmpeg.exe").asFile.exists() && !zip.exists() }
+    doLast {
+        downloadVerified(
+            "https://github.com/GyanD/codexffmpeg/releases/download/$ffmpegVersion/" +
+                "ffmpeg-$ffmpegVersion-essentials_build.zip",
+            zip, ffmpegZipSha256
+        )
+    }
+}
+
+// Skipped if ffmpeg/bin/ffmpeg.exe already exists
+val downloadFfmpeg = tasks.register<Copy>("downloadFfmpeg") {
+    group = "setup"
+    description = "Downloads ffmpeg $ffmpegVersion (essentials build) into ffmpeg/bin if missing"
+    dependsOn(downloadFfmpegZip)
+    onlyIf { !ffmpegBin.file("ffmpeg.exe").asFile.exists() }
+    from({ zipTree(ffmpegZip) }) {
+        include("*/bin/ffmpeg.exe", "*/bin/ffprobe.exe")
+        eachFile { path = "bin/$name" }
+    }
+    from({ zipTree(ffmpegZip) }) {
+        include("*/LICENSE")
+        eachFile { path = name }
+    }
+    includeEmptyDirs = false
+    into(layout.projectDirectory.dir("ffmpeg"))
+}
+
+tasks.register("downloadBinaries") {
+    group = "setup"
+    description = "Downloads yt-dlp.exe and ffmpeg if missing"
+    dependsOn(downloadYtDlp, downloadFfmpeg)
+}
+
 // Run on Windows
 tasks.register<Exec>("jpackageWindows") {
     configureJpackage("src/main/resources/icon.ico")
@@ -78,12 +168,13 @@ tasks.register<Exec>("jpackageWindows") {
 tasks.register<Copy>("distWindows") {
     group = "distribution"
     description = "Builds a standalone Windows app folder in build/dist/$appName"
-    dependsOn("jpackageWindows")
+    dependsOn("jpackageWindows", "downloadBinaries")
     from(layout.projectDirectory.file("yt-dlp.exe"))
     from(layout.projectDirectory.dir("ffmpeg/bin")) {
         include("ffmpeg.exe", "ffprobe.exe")
         into("ffmpeg/bin")
     }
+    from(layout.projectDirectory.file("ffmpeg/LICENSE")) { into("ffmpeg") }
     into(layout.buildDirectory.dir("dist/$appName"))
 }
 
