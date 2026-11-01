@@ -33,15 +33,22 @@ tasks.register<Copy>("collectJars") {
 val appName = "YouTube Downloader"
 val mainJar = tasks.named<Jar>("jar").map { it.archiveFileName.get() }
 
+// Use jpackage from the Java 25 toolchain (not whatever is on PATH) so the bundled runtime
+// matches the bytecode version the app is compiled for
+val jpackageExecutable = javaToolchains.launcherFor(java.toolchain).map {
+    val exe = if (System.getProperty("os.name").lowercase().contains("win")) "jpackage.exe" else "jpackage"
+    it.metadata.installationPath.file("bin/$exe").asFile.absolutePath
+}
+
 fun Exec.configureJpackage(icon: String) {
     group = "distribution"
     dependsOn("collectJars")
     doFirst {
         layout.buildDirectory.dir("dist/$appName").get().asFile.deleteRecursively()
         layout.buildDirectory.dir("dist/$appName.app").get().asFile.deleteRecursively()
+        executable = jpackageExecutable.get()
     }
-    commandLine(
-        "jpackage",
+    args(
         "--name", appName,
         "--input", layout.buildDirectory.dir("package-input").get().asFile.absolutePath,
         "--main-jar", mainJar.get(),
@@ -53,8 +60,31 @@ fun Exec.configureJpackage(icon: String) {
 }
 
 // Run on Windows
-tasks.register<Exec>("distWindows") {
+tasks.register<Exec>("jpackageWindows") {
     configureJpackage("src/main/resources/icon.ico")
+}
+
+// Builds a standalone app folder with yt-dlp.exe and ffmpeg next to the launcher, since the app
+// resolves them (and theme_config.properties) relative to its working directory
+tasks.register<Copy>("distWindows") {
+    group = "distribution"
+    description = "Builds a standalone Windows app folder in build/dist/$appName"
+    dependsOn("jpackageWindows")
+    from(layout.projectDirectory.file("yt-dlp.exe"))
+    from(layout.projectDirectory.dir("ffmpeg/bin")) {
+        include("ffmpeg.exe", "ffprobe.exe")
+        into("ffmpeg/bin")
+    }
+    into(layout.buildDirectory.dir("dist/$appName"))
+}
+
+// Zips the Windows app folder for copying to another machine
+tasks.register<Zip>("distWindowsZip") {
+    group = "distribution"
+    dependsOn("distWindows")
+    from(layout.buildDirectory.dir("dist/$appName")) { into(appName) }
+    archiveFileName.set("$appName-windows.zip")
+    destinationDirectory.set(layout.buildDirectory.dir("dist"))
 }
 
 // Run on Linux
