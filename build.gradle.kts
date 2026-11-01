@@ -46,6 +46,8 @@ fun Exec.configureJpackage(icon: String) {
     doFirst {
         listOf("dist/$appName", "dist/$appName.app").forEach { path ->
             val dir = layout.buildDirectory.dir(path).get().asFile
+            // Clear read-only flags first; Windows refuses to delete read-only files
+            dir.walkBottomUp().forEach { it.setWritable(true) }
             if (!dir.deleteRecursively()) {
                 throw GradleException(
                     "Could not delete ${dir.absolutePath}. Close the app and any Explorer/terminal " +
