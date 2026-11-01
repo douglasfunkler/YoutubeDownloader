@@ -6,6 +6,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.FontUIResource;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
@@ -68,6 +69,11 @@ public class ThemeManager {
      * Load the saved theme from the configuration file
      */
     private static void loadSavedTheme() {
+        if (!new File(CONFIG_FILE).exists()) {
+            // First run: no saved preference yet, use the default (this also creates the file)
+            setLightTheme();
+            return;
+        }
         final Properties properties = new Properties();
         try (final InputStream input = new FileInputStream(CONFIG_FILE)) {
             properties.load(input);

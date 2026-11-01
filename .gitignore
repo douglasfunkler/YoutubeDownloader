@@ -10,3 +10,6 @@ out/
 # Bundled binaries (download separately; copied into the dist by distWindows)
 yt-dlp.exe
 ffmpeg/
+
+# Per-user app state (created by the app on first run)
+theme_config.properties
