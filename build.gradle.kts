@@ -152,11 +152,13 @@ val downloadFfmpeg = tasks.register<Copy>("downloadFfmpeg") {
     into(layout.projectDirectory.dir("ffmpeg"))
 }
 
-tasks.register("downloadBinaries") {
+val downloadBinaries = tasks.register("downloadBinaries") {
     group = "setup"
     description = "Downloads yt-dlp.exe and ffmpeg if missing"
     dependsOn(downloadYtDlp, downloadFfmpeg)
 }
+
+tasks.named("run") { dependsOn(downloadBinaries) }
 
 // Run on Windows
 tasks.register<Exec>("jpackageWindows") {
