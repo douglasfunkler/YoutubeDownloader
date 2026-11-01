@@ -1,0 +1,12 @@
+# Gradle
+.gradle/
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Bundled binaries (download separately; copied into the dist by distWindows)
+yt-dlp.exe
+ffmpeg/
