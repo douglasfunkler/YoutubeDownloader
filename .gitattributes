@@ -1,0 +1,32 @@
+# Normalize line endings: text files are stored with LF in the repo and checked
+# out with the platform's native endings (per core.autocrlf), unless overridden below.
+* text=auto
+
+# Shell scripts must keep LF everywhere, or they fail on Linux/macOS
+gradlew  text eol=lf
+*.sh     text eol=lf
+
+# Windows batch files need CRLF everywhere
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+
+# Explicitly text
+*.java       text diff=java
+*.kts        text
+*.gradle     text
+*.properties text
+*.md         text diff=markdown
+*.svg        text
+*.xml        text
+
+# Binary
+*.jar   binary
+*.exe   binary
+*.dll   binary
+*.ico   binary
+*.icns  binary
+*.png   binary
+*.jpg   binary
+*.gif   binary
+*.zip   binary
+*.7z    binary
